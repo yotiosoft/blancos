@@ -1,10 +1,22 @@
 # 準備
+nightly の設定、rust-src のインストール
 ```bash
 $ rustup override set nightly
 $ rustup component add rust-src
 ```
 
+bootimage のインストール
+```bash
+$ rustup component add llvm-tools-preview
+$ cargo install bootimage
+```
+
 # ビルド
 ```bash
-$ cargo build
+$ cargo bootimage
+```
+
+# 起動
+```bash
+$ qemu-system-x86_64 -drive format=raw,file=target/x86_64-blancos/debug/bootimage-blancos.bin
 ```
