@@ -17,6 +17,12 @@ $ cargo bootimage
 ```
 
 # 起動
+GUI で起動
 ```bash
 $ qemu-system-x86_64 -drive format=raw,file=target/x86_64-blancos/debug/bootimage-blancos.bin
+```
+
+CUI で起動
+```bash
+$ qemu-system-x86_64 -drive format=raw,file=target/x86_64-blancos/debug/bootimage-blancos.bin -nographic
 ```
