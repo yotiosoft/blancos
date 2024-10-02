@@ -8,8 +8,9 @@ mod vga_buffer;
 /// パニックハンドラ
 /// パニック時に呼ばれる
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
+fn panic(info: &PanicInfo) -> ! {
+    println!("{}", info);
+    loop{}
 }
 
 static HELLO: &[u8] = b"Hello World!";
@@ -19,6 +20,7 @@ static HELLO: &[u8] = b"Hello World!";
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     println!("Hello World{}", "!");
+    panic!("Some panic message");
     
     loop{}
 }
