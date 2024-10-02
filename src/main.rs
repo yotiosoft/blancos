@@ -8,13 +8,25 @@
 use core::panic::PanicInfo;
 
 mod vga_buffer;
+mod serial;
 
 /// パニックハンドラ
 /// パニック時に呼ばれる
+#[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop{}
+    loop {}
+}
+
+/// テスト時に使うパニックハンドラ
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    serial_println!("[failed]\n");
+    serial_println!("Error: {}\n", info);
+    exit_qemu(QemuExitCode::Failed);
+    loop {}
 }
 
 /// エントリポイント
@@ -26,7 +38,7 @@ pub extern "C" fn _start() -> ! {
     #[cfg(test)]
     test_main();
     
-    loop{}
+    loop {}
 }
 
 // QEMU Exit Code
@@ -49,9 +61,9 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
 /// test_runner
 #[cfg(test)]
 pub fn test_runner(tests: &[&dyn Fn()]) {
-    println!("Running {} tests", tests.len());
+    serial_println!("Running {} tests", tests.len());
     for test in tests {
-        test();
+        test.run();
     }
     
     exit_qemu(QemuExitCode::Success);
@@ -59,7 +71,19 @@ pub fn test_runner(tests: &[&dyn Fn()]) {
 
 #[test_case]
 fn trivial_assertion() {
-    print!("trivial assertion... "); // "些末なアサーション……"
     assert_eq!(1, 1);
-    println!("[ok]");
+}
+
+pub trait Testable {
+    fn run(&self) -> ();
+}
+impl<T> Testable for T
+where
+    T: Fn(),
+{
+    fn run(&self) {
+        serial_print!("{}...\t", core::any::type_name::<T>());
+        self();
+        serial_println!("[ok]");
+    }
 }
