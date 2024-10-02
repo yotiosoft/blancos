@@ -120,7 +120,7 @@ impl fmt::Write for Writer {
     }
 }
 
-/// static な Writer インスタンスを生成
+// static な Writer インスタンスを生成
 lazy_static! {
     pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
         column_position: 0,
