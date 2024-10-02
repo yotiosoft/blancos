@@ -1,4 +1,5 @@
 use volatile::Volatile;
+use core::fmt;
 
 /// VGA バッファの色を表す列挙型
 #[allow(dead_code)]                             // enum Color に対する警告を抑制
@@ -90,7 +91,16 @@ impl Writer {
     }
 }
 
+/// fmt::Write トレイトの実装
+impl fmt::Write for Writer {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.write_string(s);
+        Ok(())
+    }
+}
+
 /// テスト
+use core::fmt::Write;
 pub fn print_something() {
     let mut writer = Writer {
         column_position: 0,
@@ -99,6 +109,6 @@ pub fn print_something() {
     };
 
     writer.write_byte(b'H');
-    writer.write_string("ello ");
-    writer.write_string("Wörld!");
+    writer.write_string("ello! ");
+    write!(writer, "The numbers are {} and {}", 42, 1.0/3.0).unwrap();
 }
