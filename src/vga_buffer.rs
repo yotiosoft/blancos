@@ -1,6 +1,7 @@
 use volatile::Volatile;
 use core::fmt;
 use lazy_static::lazy_static;
+use spin::Mutex;
 
 /// VGA バッファの色を表す列挙型
 #[allow(dead_code)]                             // enum Color に対する警告を抑制
@@ -121,23 +122,9 @@ impl fmt::Write for Writer {
 
 /// static な Writer インスタンスを生成
 lazy_static! {
-    pub static WRITER: Writer = Writer {
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
         column_position: 0,
         color_code: ColorCode::new(Color::Yellow, Color::Black),
         buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    }
-}
-
-/// テスト
-use core::fmt::Write;
-pub fn print_something() {
-    let mut writer = Writer {
-        column_position: 0,
-        color_code: ColorCode::new(Color::Yellow, Color::Black),
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },              // VGA buffer への生ポインタ（ここに文字を書き込むと、画面に表示される）
-    };
-
-    writer.write_byte(b'H');
-    writer.write_string("ello! ");
-    write!(writer, "The numbers are {} and {}", 42, 1.0/3.0).unwrap();
+    }); 
 }
