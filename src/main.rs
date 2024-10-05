@@ -7,16 +7,21 @@
 
 use core::panic::PanicInfo;
 use blancos::println;
-
 /// エントリポイント
 /// no_mangle: 関数名を変更しない. エントリポイントをリンカに伝えるために必須
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     println!("Hello World{}", "!");
 
+    blancos::init();
+
+    // breakpoint 例外を発生させる
+    x86_64::instructions::interrupts::int3();
+
     #[cfg(test)]
     test_main();
     
+    println!("It did not crash!");
     loop {}
 }
 
