@@ -10,10 +10,12 @@ use core::panic::PanicInfo;
 pub mod vga_buffer;
 pub mod serial;
 pub mod interrupts;
+pub mod gdt;
 
 /// init
 /// IDT の初期化
 pub fn init() {
+    gdt::init();
     interrupts::init_idt();
 }
 
