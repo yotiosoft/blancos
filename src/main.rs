@@ -15,6 +15,10 @@ pub extern "C" fn _start() -> ! {
 
     blancos::init();
 
+    unsafe {
+        *(0xdeadbeef as *mut u8) = 42;
+    }
+
     // breakpoint 例外を発生させる
     x86_64::instructions::interrupts::int3();
 
