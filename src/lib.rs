@@ -17,6 +17,10 @@ pub mod gdt;
 pub fn init() {
     gdt::init();
     interrupts::init_idt();
+    unsafe {
+        interrupts::PICS.lock().initialize();
+    }
+    x86_64::instructions::interrupts::enable();
 }
 
 pub trait Testable {
@@ -48,7 +52,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("[failed]\n");
     serial_println!("Error: {}\n", info);
     exit_qemu(QemuExitCode::Failed);
-    loop {}
+    blancos::hlt_loop();
 }
 
 /// _start エントリポイント
@@ -57,8 +61,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
 pub extern "C" fn _start() -> ! {
     init();
     test_main();
-
-    loop {}
+    blancos::hlt_loop();
 }
 
 /// パニックハンドラ
@@ -66,6 +69,13 @@ pub extern "C" fn _start() -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     test_panic_handler(info)
+}
+
+/// CPU を停止
+pub fn hlt() -> ! {
+    loop {
+        x86_64::instructions::hlt();
+    }
 }
 
 // QEMU Exit Code

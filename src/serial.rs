@@ -15,7 +15,12 @@ lazy_static! {
 #[doc(hidden)]
 pub fn _print(args: ::core::fmt::Arguments) {
     use core::fmt::Write;
-    SERIAL1.lock().write_fmt(args).expect("Printing to serial failed");
+    use x86_64::instructions::interrupts;
+
+    // ロック中の割り込みを防止
+    interrupts::without_interrupts(|| {
+        SERIAL1.lock().write_fmt(args).expect("Printing to serial failed");
+    });
 }
 
 /// シリアルポートに文字列を書き込む

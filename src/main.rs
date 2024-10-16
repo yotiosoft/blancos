@@ -22,7 +22,7 @@ pub extern "C" fn _start() -> ! {
     test_main();
     
     println!("It did not crash!");
-    loop {}
+    blancos::hlt_loop();
 }
 
 /// パニックハンドラ
@@ -31,7 +31,7 @@ pub extern "C" fn _start() -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    blancos::hlt_loop();
 }
 
 /// テスト時に使うパニックハンドラ
