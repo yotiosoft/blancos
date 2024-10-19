@@ -10,6 +10,7 @@ spin = "0.9.8"
 x86_64 = "0.14.2"       # for QEMU exit
 uart_16550 = "0.2.0"    # serial port (to print to console)
 pic8259 = "0.10.1"      # for interrupt handling
+pc-keyboard = "0.7.0"   # for keyboard input
 
 [dependencies.lazy_static]
 version = "1.0.1"
