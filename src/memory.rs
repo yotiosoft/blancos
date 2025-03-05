@@ -1,5 +1,5 @@
 use x86_64::{ VirtAddr, PhysAddr };
-use x86_64::structures::paging::{ PageTable, OffsetPageTable };
+use x86_64::structures::paging::{ PageTable, OffsetPageTable, Page, PhysFrame, Mapper, Size4KiB, FrameAllocator };
 
 /// 新しい OffsetPageTable を初期化する
 pub unsafe fn init(physical_memory_offset: VirtAddr) -> OffsetPageTable<'static> {
@@ -10,6 +10,27 @@ pub unsafe fn init(physical_memory_offset: VirtAddr) -> OffsetPageTable<'static>
 /// 与えられた仮想アドレスを対応する物理アドレスに変換
 pub unsafe fn translate_addr(addr: VirtAddr, physical_memory_offset: VirtAddr) -> Option<PhysAddr> {
     translate_addr_inner(addr, physical_memory_offset)
+}
+
+/// 与えられたページをフレーム 0xb8000 に試しにマップする
+pub fn create_example_mapping(page: Page, mapper: &mut OffsetPageTable, frame_allocator: &mut impl FrameAllocator<Size4KiB>) {
+    use x86_64::structures::paging::PageTableFlags as Flags;
+
+    let frame = PhysFrame::containing_address(PhysAddr::new(0xb8000));
+    let flags = Flags::PRESENT | Flags::WRITABLE;
+
+    let map_to_result = unsafe {
+        mapper.map_to(page, frame, flags, frame_allocator)
+    };
+    map_to_result.expect("map_to failed").flush();
+}
+
+/// 常に None を返す FrameAllcoator
+pub struct EmptyFrameAllocator;
+unsafe impl FrameAllocator<Size4KiB> for EmptyFrameAllocator {
+    fn allocate_frame(&mut self) -> Option<PhysFrame> {
+        None
+    }
 }
 
 /// 有効な level4 テーブルへの可変参照を渡す
