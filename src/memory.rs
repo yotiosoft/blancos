@@ -1,5 +1,6 @@
 use x86_64::{ VirtAddr, PhysAddr };
 use x86_64::structures::paging::{ PageTable, OffsetPageTable, Page, PhysFrame, Mapper, Size4KiB, FrameAllocator };
+use bootloader::bootinfo::{ MemoryMap, MemoryRegionType };
 
 /// 新しい OffsetPageTable を初期化する
 pub unsafe fn init(physical_memory_offset: VirtAddr) -> OffsetPageTable<'static> {
@@ -25,11 +26,40 @@ pub fn create_example_mapping(page: Page, mapper: &mut OffsetPageTable, frame_al
     map_to_result.expect("map_to failed").flush();
 }
 
-/// 常に None を返す FrameAllcoator
-pub struct EmptyFrameAllocator;
-unsafe impl FrameAllocator<Size4KiB> for EmptyFrameAllocator {
+/// FrameAllcoator
+unsafe impl FrameAllocator<Size4KiB> for BootInfoFrameAllocator {
     fn allocate_frame(&mut self) -> Option<PhysFrame> {
-        None
+        let frame = self.usable_frames().nth(self.next);
+        self.next += 1;
+        frame
+    }
+}
+
+/// ブートローダのメモリマップから使用可能なフレームを返す
+pub struct BootInfoFrameAllocator {
+    memory_map: &'static MemoryMap,
+    next: usize,
+}
+impl BootInfoFrameAllocator {
+    /// 渡されたメモリマップから FrameAllocator を作る
+    pub unsafe fn init(memory_map: &'static MemoryMap) -> Self {
+        BootInfoFrameAllocator {
+            memory_map,
+            next: 0,
+        }
+    }
+
+    /// メモリマップによって指定された利用可能なフレームのイテレータを返す
+    fn usable_frames(&self) -> impl Iterator<Item = PhysFrame> {
+        // メモリマップから利用可能な領域を得る
+        let regions = self.memory_map.iter();
+        let usable_regions = regions.filter(|r| r.region_type == MemoryRegionType::Usable);
+        // それぞれの領域をアドレス範囲に map で変換する
+        let addr_ranges = usable_regions.map(|r| r.range.start_addr()..r.range.end_addr());
+        // フレームの開始アドレスのイテレータへと変換する
+        let frame_addresses = addr_ranges.flat_map(|r| r.step_by(4096));
+        // 開始アドレスから PhysFrame 型を得る
+        frame_addresses.map(|addr| PhysFrame::containing_address(PhysAddr::new(addr)))
     }
 }
 
