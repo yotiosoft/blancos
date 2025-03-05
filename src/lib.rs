@@ -7,10 +7,25 @@
 
 use core::panic::PanicInfo;
 
+#[cfg(test)]
+use bootloader::{ entry_point, BootInfo };
+
+#[cfg(test)]
+entry_point!(test_kernel_main);
+
 pub mod vga_buffer;
 pub mod serial;
 pub mod interrupts;
 pub mod gdt;
+pub mod memory;
+
+/// エントリポイント
+#[cfg(test)]
+fn test_kernel_main(_boot_info: &'static BootInfo) -> ! {
+    init();
+    test_main();
+    hlt_loop();
+}
 
 /// init
 /// IDT の初期化
@@ -52,15 +67,6 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("[failed]\n");
     serial_println!("Error: {}\n", info);
     exit_qemu(QemuExitCode::Failed);
-    hlt_loop();
-}
-
-/// _start エントリポイント
-#[cfg(test)]
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
-    init();
-    test_main();
     hlt_loop();
 }
 
