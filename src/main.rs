@@ -5,10 +5,13 @@
 #![test_runner(blancos::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+extern crate alloc;
+
 use bootloader::{ BootInfo, entry_point };
 use core::panic::PanicInfo;
 use blancos::println;
 use blancos::memory;
+use alloc::boxed::Box;
 
 entry_point!(kernel_main);
 
@@ -53,6 +56,11 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
         let phys = mapper.translate_addr(virt);
         println!("{:?} -> {:?}", virt, phys);
     }
+
+    // allocator 初期化
+    allocator::init_heap(&mut mapper, &mut frame_allocator).except("heap initialization failed");
+
+    let x = Box::new(41);
 
     #[cfg(test)]
     test_main();
