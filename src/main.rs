@@ -11,7 +11,8 @@ use bootloader::{ BootInfo, entry_point };
 use core::panic::PanicInfo;
 use blancos::println;
 use blancos::memory;
-use alloc::boxed::Box;
+use blancos::allocator;
+use alloc::{ boxed::Box, vec, vec::Vec, rc::Rc };
 
 entry_point!(kernel_main);
 
@@ -58,9 +59,22 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     }
 
     // allocator 初期化
-    allocator::init_heap(&mut mapper, &mut frame_allocator).except("heap initialization failed");
+    allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
 
+    // allocates
     let x = Box::new(41);
+    println!("heap_value at {:p}", x);
+    let mut vec = Vec::new();
+    for i in 0..500 {
+        vec.push(i);
+    }
+    println!("vec at {:p}", vec.as_slice());
+    // 参照されたベクタを作成する → カウントが0になると解放される
+    let reference_counted = Rc::new(vec![1, 2, 3]);
+    let cloned_reference = reference_counted.clone();
+    println!("current reference count is {}", Rc::strong_count(&cloned_reference));
+    core::mem::drop(reference_counted);
+    println!("reference count is {} now", Rc::strong_count(&cloned_reference));
 
     #[cfg(test)]
     test_main();
