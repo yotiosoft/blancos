@@ -3,7 +3,8 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
-#![feature(abi_x86_interrupt)
+#![feature(abi_x86_interrupt)]
+#![feature(alloc_error_handler)]
 
 extern crate alloc;
 
@@ -20,6 +21,7 @@ pub mod serial;
 pub mod interrupts;
 pub mod gdt;
 pub mod memory;
+pub mod allocator;
 
 /// エントリポイント
 #[cfg(test)]
@@ -86,7 +88,13 @@ pub fn hlt_loop() -> ! {
     }
 }
 
-// QEMU Exit Code
+/// alloc エラーハンドラ
+#[alloc_error_handler]
+fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
+    panic!("allocation error: {:?}", layout)
+}
+
+/// QEMU Exit Code
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
 pub enum QemuExitCode {
