@@ -71,6 +71,7 @@ impl LinkedListAllocator {
                 let next = region.next.take();
                 let ret = Some((current.next.take().unwrap(), alloc_start));
                 current.next = next;
+                return ret;
             }
             else {
                 // 割当に適していなければ次の領域へ
