@@ -1,6 +1,6 @@
 
 struct ListNode {
-    next: option<&'static mut ListNode>,
+    next: Option<&'static mut ListNode>,
 }
 
 /// Block sizes
@@ -16,7 +16,7 @@ impl FixedSizeBlockAllocator {
     /// 空の FixedSizeBlockAllcoator を作る
     pub const fn new() -> Self {
         const EMPTY: Option<&'static mut ListNode> = None;
-        FixedSizeBlockAllcoator {
+        FixedSizeBlockAllocator {
             list_heads: [EMPTY; BLOCK_SIZES.len()],
             fallback_allocator: linked_list_allocator::Heap::empty(),
         }
