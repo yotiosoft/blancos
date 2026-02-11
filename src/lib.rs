@@ -12,6 +12,7 @@ pub mod gdt;
 pub mod memory;
 pub mod allocator;
 pub mod serial;
+pub mod task;
 
 mod libbackend;
 pub use libbackend::exit::*;
