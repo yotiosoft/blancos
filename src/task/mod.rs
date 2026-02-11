@@ -4,8 +4,11 @@ use core::task::{ Context, Poll };
 use core::sync::atomic::{ AtomicU64, Ordering };
 use alloc::boxed::Box;
 
+pub mod executor;
 pub mod simple_executor;
 pub mod keyboard;
+
+static TASK_MAX: usize = 100;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 struct TaskId(u64);

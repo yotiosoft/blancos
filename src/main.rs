@@ -15,7 +15,7 @@ use alloc::{ boxed::Box, vec, vec::Vec, rc::Rc };
 use blancos::println;
 use blancos::memory;
 use blancos::allocator;
-use blancos::task::{ Task, simple_executor::SimpleExecutor };
+use blancos::task::{ Task, executor::Executor };
 
 entry_point!(kernel_main);
 
@@ -79,17 +79,18 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     core::mem::drop(reference_counted);
     println!("reference count is {} now", Rc::strong_count(&cloned_reference));
 
-    // キーボード割り込み
-    let mut executor = SimpleExecutor::new();
-    executor.spawn(Task::new(example_task()));
-    executor.spawn(Task::new(keyboard::print_keypresses()));
-    executor.run();
-
     #[cfg(test)]
     test_main();
     
     println!("It did not crash!");
-    blancos::hlt_loop();
+
+    // キーボード割り込み
+    let mut executor = Executor::new();
+    executor.spawn(Task::new(example_task()));
+    executor.spawn(Task::new(keyboard::print_keypresses()));
+    executor.run();
+    
+    //blancos::hlt_loop();
 }
 
 // Executor 用のタスク
