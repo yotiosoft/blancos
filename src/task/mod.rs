@@ -4,6 +4,7 @@ use core::task::{ Context, Poll };
 use alloc::boxed::Box;
 
 pub mod simple_executor;
+pub mod keyboard;
 
 /// タスク
 pub struct Task {
