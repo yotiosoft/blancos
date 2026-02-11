@@ -7,6 +7,7 @@
 
 extern crate alloc;
 
+use blancos::task::keyboard;
 use bootloader::{ BootInfo, entry_point };
 use core::panic::PanicInfo;
 use alloc::{ boxed::Box, vec, vec::Vec, rc::Rc };
@@ -78,9 +79,10 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     core::mem::drop(reference_counted);
     println!("reference count is {} now", Rc::strong_count(&cloned_reference));
 
-    // Executor 実行
+    // キーボード割り込み
     let mut executor = SimpleExecutor::new();
     executor.spawn(Task::new(example_task()));
+    executor.spawn(Task::new(keyboard::print_keypresses()));
     executor.run();
 
     #[cfg(test)]
