@@ -9,10 +9,12 @@ extern crate alloc;
 
 use bootloader::{ BootInfo, entry_point };
 use core::panic::PanicInfo;
+use alloc::{ boxed::Box, vec, vec::Vec, rc::Rc };
+
 use blancos::println;
 use blancos::memory;
 use blancos::allocator;
-use alloc::{ boxed::Box, vec, vec::Vec, rc::Rc };
+use blancos::task::{ Task, simple_executor::SimpleExecutor };
 
 entry_point!(kernel_main);
 
@@ -76,11 +78,25 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     core::mem::drop(reference_counted);
     println!("reference count is {} now", Rc::strong_count(&cloned_reference));
 
+    // Executor 実行
+    let mut executor = SimpleExecutor::new();
+    executor.spawn(Task::new(example_task()));
+    executor.run();
+
     #[cfg(test)]
     test_main();
     
     println!("It did not crash!");
     blancos::hlt_loop();
+}
+
+// Executor 用のタスク
+async fn async_number() -> u32 {
+    42
+}
+async fn example_task() {
+    let number = async_number().await;
+    println!("async number: {}", number);
 }
 
 /// パニックハンドラ

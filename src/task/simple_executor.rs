@@ -1,5 +1,5 @@
 use super::Task;
-use alloc::{ collections::VecDeque, vec::Vec };
+use alloc::{ collections::VecDeque };
 use core::task::{ Context, RawWaker, RawWakerVTable, Waker, Poll };
 
 pub struct SimpleExecutor {
