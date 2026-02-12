@@ -29,6 +29,7 @@ impl Executor {
     pub fn run(&mut self) -> ! {
         loop {
             self.run_ready_tasks();
+            self.sleep_if_idle();
         }
     }
 
@@ -55,6 +56,21 @@ impl Executor {
                 }
                 Poll::Pending => {}
             }
+        }
+    }
+
+    fn sleep_if_idle(&self) {
+        // ここで割り込みが起こった場合の対策:
+        // CPU 割り込みを無効化し、hlt 命令と一緒にアトミックに再度有効化
+        use x86_64::instructions::interrupts::{ self, enable_and_hlt };
+
+        interrupts::disable();
+        
+        if self.task_queue.is_empty() {
+            enable_and_hlt();
+        }
+        else {
+            interrupts::enable();
         }
     }
 }
