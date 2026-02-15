@@ -16,6 +16,7 @@ use ferrios::println;
 use ferrios::memory;
 use ferrios::allocator;
 use ferrios::task::{ Task, executor::Executor };
+use ferrios::process;
 
 entry_point!(kernel_main);
 
