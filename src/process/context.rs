@@ -9,6 +9,7 @@ pub struct Context {
     pub r12: u64,
     pub rbx: u64,
     pub rbp: u64,
+    pub rsp: u64,
     pub rip: u64,
 }
 
@@ -21,6 +22,7 @@ impl Context {
             r12: 0,
             rbx: 0,
             rbp: 0,
+            rsp: 0,
             rip: 0,
         }
     }
