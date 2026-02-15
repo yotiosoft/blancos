@@ -88,23 +88,9 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     // カーネルスレッド作成
     process::create_kernel_thread(kernel_thread_1, 1);
     process::create_kernel_thread(kernel_thread_2, 2);
+    process::create_kernel_thread(keyboard_thread, 3);
 
     process::scheduler::start_scheduler();
-    
-    // キーボード割り込み
-    let mut executor = Executor::new();
-    executor.spawn(Task::new(example_task()));
-    executor.spawn(Task::new(keyboard::print_keypresses()));
-    executor.run();
-}
-
-// Executor 用のタスク
-async fn async_number() -> u32 {
-    42
-}
-async fn example_task() {
-    let number = async_number().await;
-    println!("async number: {}", number);
 }
 
 // カーネルスレッド
@@ -127,6 +113,13 @@ fn kernel_thread_2() -> ! {
             unsafe { core::arch::asm!("nop"); }
         }
     }
+}
+
+// キーボード割り込み用スレッド
+fn keyboard_thread() -> ! {
+    let mut executor = Executor::new();
+    executor.spawn(Task::new(keyboard::print_keypresses()));
+    executor.run();
 }
 
 /// パニックハンドラ

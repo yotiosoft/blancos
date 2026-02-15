@@ -37,7 +37,6 @@ extern "x86-interrupt" fn double_fault_handler(stack_frame: InterruptStackFrame,
 }
 
 /// ページフォルトハンドラ
-
 extern "x86-interrupt" fn page_fault_handler(stack_frame: InterruptStackFrame, error_code: PageFaultErrorCode) {
     use x86_64::registers::control::Cr2;
 
@@ -57,7 +56,7 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFr
     unsafe {
         if crate::process::scheduler::SCHEDULER_STARTED {
             scheduler::yield_from_context();
-            
+
             PICS.lock().notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
         }
     }

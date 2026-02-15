@@ -43,15 +43,14 @@ pub fn scheduler() -> ! {
             // ラウンドロビンで次のプロセスを探す
             let mut next_pid = (current_pid + 1) % NPROC;
             loop {
-                use crate::println;
                 if table[next_pid].state == ProcessState::Runnable {
-                    println!("NEXT: {}", next_pid);
+                    //crate::println!("NEXT: {}", next_pid);
                     break;
                 }
 
                 // すべて探して Runnable が見つからなければ idle 状態へ
                 if next_pid == current_pid {
-                    println!("hlt");
+                    //crate::println!("hlt");
                     use x86_64::instructions::interrupts::enable_and_hlt;
                     enable_and_hlt();
                 }
@@ -80,7 +79,7 @@ pub fn scheduler() -> ! {
         };
         unsafe {
             x86_64::instructions::interrupts::enable();
-            use crate::println; println!("switch");
+            //crate::println!("switch");
             switch_context(old_context, new_context);
         }
     }
@@ -100,8 +99,7 @@ pub fn yield_from_context() {
         return;
     }
 
-    use crate::println;
-    println!("yield");
+    //crate::println!("yield");
 
     // Runnable に変更
     table[current_pid].state = ProcessState::Runnable;
