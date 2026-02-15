@@ -1,6 +1,4 @@
-use super::init::*;
 use super::super::{ serial_print, serial_println };
-use crate::hlt_loop;
 use super::exit::*;
 
 pub trait Testable {

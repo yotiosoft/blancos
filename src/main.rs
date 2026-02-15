@@ -21,7 +21,7 @@ entry_point!(kernel_main);
 
 /// エントリポイント
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    use blancos::memory::{ translate_addr, BootInfoFrameAllocator };
+    use blancos::memory::BootInfoFrameAllocator;
     use x86_64::{ structures::paging::Page, structures::paging::Translate, VirtAddr };
 
     println!("Hello World{}", "!");

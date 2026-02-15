@@ -1,18 +1,9 @@
-use alloc::alloc::{ GlobalAlloc, Layout };
-use core::ptr::null_mut;
 use x86_64::{
     structures::paging::{
         mapper::MapToError, FrameAllocator, Mapper, Page, PageTableFlags, Size4KiB,
     },
     VirtAddr,
 };
-use linked_list_allocator::LockedHeap;
-
-pub mod bump;
-use bump::BumpAllocator;
-
-pub mod linked_list;
-use linked_list::LinkedListAllocator;
 
 use crate::allocator::fixed_size_block::FixedSizeBlockAllocator;
 
@@ -67,19 +58,4 @@ pub fn init_heap(mapper: &mut impl Mapper<Size4KiB>, frame_allocator: &mut impl 
     }
 
     Ok(())
-}
-
-// 与えられたアドレス addr を align に上丸めする
-fn align_up(addr: usize, align: usize) -> usize {
-    /*
-    let remainder = addr % align;
-    if remainder == 0 {
-        addr
-    }
-    else {
-        addr - remainder + align
-    }
-    */
-    // 上のコードと等価
-    (addr + align - 1) & !(align - 1)
 }

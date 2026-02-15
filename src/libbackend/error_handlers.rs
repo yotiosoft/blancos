@@ -1,10 +1,8 @@
-use core::panic::PanicInfo;
-use super::init::*;
-
 /// パニックハンドラ
 #[cfg(test)]
 #[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
+fn panic(info: &core::panic::PanicInfo) -> ! {
+    use super::init::*;
     test_panic_handler(info)
 }
 
