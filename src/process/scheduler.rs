@@ -6,7 +6,7 @@ use crate::process::switch::save_context;
 use lazy_static::lazy_static;
 
 static mut CURRENT_PID: usize = 0;
-static mut SCHEDULER_STARTED: bool = false;
+pub static mut SCHEDULER_STARTED: bool = false;
 
 lazy_static! {
     static ref CPU: spin::Mutex<cpu::Cpu> = spin::Mutex::new(cpu::Cpu::new(0));
@@ -33,7 +33,7 @@ pub fn start_scheduler() -> ! {
 /// スケジューラ
 pub fn scheduler() -> ! {
     loop {
-        let (next_pid, old_context, new_context) = {
+        let (old_context, new_context) = {
             let mut table = PROCESS_TABLE.lock();
 
             let current_pid = unsafe {
@@ -48,7 +48,6 @@ pub fn scheduler() -> ! {
                     println!("NEXT: {}", next_pid);
                     break;
                 }
-                next_pid = (next_pid + 1) % NPROC;
 
                 // すべて探して Runnable が見つからなければ idle 状態へ
                 if next_pid == current_pid {
@@ -56,11 +55,20 @@ pub fn scheduler() -> ! {
                     use x86_64::instructions::interrupts::enable_and_hlt;
                     enable_and_hlt();
                 }
+
+                next_pid = (next_pid + 1) % NPROC;
             }
 
             // プロセス状態を更新
             table[next_pid].state = ProcessState::Running;
-            
+            if table[current_pid].state == ProcessState::Running {
+                table[current_pid].state = ProcessState::Runnable;
+            }
+
+            unsafe {
+                CURRENT_PID = next_pid;
+            }
+
             // コンテキストスイッチ
             let old_context = {
                 let mut cpu = CPU.lock();
@@ -68,10 +76,9 @@ pub fn scheduler() -> ! {
             };
             let new_context = &table[next_pid].context as *const Context;
 
-            (next_pid, old_context, new_context)
+            (old_context, new_context)
         };
         unsafe {
-            CURRENT_PID = next_pid;
             x86_64::instructions::interrupts::enable();
             use crate::println; println!("switch");
             switch_context(old_context, new_context);

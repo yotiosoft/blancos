@@ -50,13 +50,16 @@ extern "x86-interrupt" fn page_fault_handler(stack_frame: InterruptStackFrame, e
 
 /// タイマ割り込みハンドラ
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    print!(".");
-
-    scheduler::yield_from_context();
-
-    // End of interrupt (割り込み終了)
     unsafe {
         PICS.lock().notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
+    }
+
+    unsafe {
+        if crate::process::scheduler::SCHEDULER_STARTED {
+            scheduler::yield_from_context();
+            
+            PICS.lock().notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
+        }
     }
 }
 

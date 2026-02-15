@@ -11,7 +11,7 @@ global_asm!(
     r#"
 .globl switch_context
 switch_context:
-    # 現在のコンテキストを保存
+    # 現在のコンテキストを保存 (RDI = old)
     mov [rdi + 0], r15
     mov [rdi + 8], r14
     mov [rdi + 16], r13
@@ -19,16 +19,15 @@ switch_context:
     mov [rdi + 32], rbx
     mov [rdi + 40], rbp
     
-    # RSP
-    mov rax, rsp
-    add rax, 8              # return address をスキップ
+    # RSP を保存
+    lea rax, [rsp + 8]
     mov [rdi + 48], rax
     
-    # RIP
+    # RIP を保存
     mov rax, [rsp]
     mov [rdi + 56], rax
-
-    # RFLAGS
+    
+    # RFLAGS を保存
     pushfq
     pop rax
     mov [rdi + 64], rax
@@ -41,14 +40,14 @@ switch_context:
     mov rbx, [rsi + 32]
     mov rbp, [rsi + 40]
     mov rsp, [rsi + 48]
-
-    # RFLAGS
+    
+    # RFLAGS を復元
     mov rax, [rsi + 64]
     push rax
     popfq
-
-    # 新しいコンテキストへジャンプする
-    mov rax, [rsi + 56]
+    
+    # 新しいプロセスへ jump
+    push qword ptr [rsi + 56]
     ret
 "#
 );

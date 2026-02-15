@@ -111,18 +111,7 @@ async fn example_task() {
 fn kernel_thread_1() -> ! {
     loop {
         // 割り込みが有効か確認
-        let rflags: u64;
-        unsafe {
-            core::arch::asm!(
-                "pushfq",
-                "pop {}",
-                out(reg) rflags
-            );
-        }
-        
-        println!("Thread 1 running RFLAGS: 0x{:x} (IF: {})", 
-                 rflags, 
-                 (rflags & 0x200) != 0);  // bit 9 をチェック
+        println!("Thread 1 running");
         
         for _ in 0..1000000 {
             unsafe { core::arch::asm!("nop"); }
@@ -131,11 +120,11 @@ fn kernel_thread_1() -> ! {
 }
 fn kernel_thread_2() -> ! {
     loop {
-        println!("Thread-2 Running");
+        // 割り込みが有効か確認
+        println!("Thread 2 running");
+        
         for _ in 0..1000000 {
-            unsafe {
-                core::arch::asm!("nop");
-            }
+            unsafe { core::arch::asm!("nop"); }
         }
     }
 }
