@@ -11,6 +11,7 @@ pub struct Context {
     pub rbp: u64,
     pub rsp: u64,
     pub rip: u64,
+    pub rflags: u64,
 }
 
 impl Context {
@@ -24,6 +25,7 @@ impl Context {
             rbp: 0,
             rsp: 0,
             rip: 0,
+            rflags: 0x0,
         }
     }
 }

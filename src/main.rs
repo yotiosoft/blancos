@@ -84,14 +84,18 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     test_main();
     
     println!("It did not crash!");
+    
+    // カーネルスレッド作成
+    process::create_kernel_thread(kernel_thread_1, 1);
+    process::create_kernel_thread(kernel_thread_2, 2);
 
+    process::scheduler::start_scheduler();
+    
     // キーボード割り込み
     let mut executor = Executor::new();
     executor.spawn(Task::new(example_task()));
     executor.spawn(Task::new(keyboard::print_keypresses()));
     executor.run();
-    
-    //ferrios::hlt_loop();
 }
 
 // Executor 用のタスク
@@ -101,6 +105,39 @@ async fn async_number() -> u32 {
 async fn example_task() {
     let number = async_number().await;
     println!("async number: {}", number);
+}
+
+// カーネルスレッド
+fn kernel_thread_1() -> ! {
+    loop {
+        // 割り込みが有効か確認
+        let rflags: u64;
+        unsafe {
+            core::arch::asm!(
+                "pushfq",
+                "pop {}",
+                out(reg) rflags
+            );
+        }
+        
+        println!("Thread 1 running RFLAGS: 0x{:x} (IF: {})", 
+                 rflags, 
+                 (rflags & 0x200) != 0);  // bit 9 をチェック
+        
+        for _ in 0..1000000 {
+            unsafe { core::arch::asm!("nop"); }
+        }
+    }
+}
+fn kernel_thread_2() -> ! {
+    loop {
+        println!("Thread-2 Running");
+        for _ in 0..1000000 {
+            unsafe {
+                core::arch::asm!("nop");
+            }
+        }
+    }
 }
 
 /// パニックハンドラ

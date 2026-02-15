@@ -5,6 +5,7 @@ use spin;
 use crate::{print, println};
 use crate::gdt;
 use crate::hlt_loop;
+use crate::process::scheduler;
 
 // まだヒープが存在しないため、IDT は静的変数として定義する
 lazy_static! {
@@ -50,6 +51,8 @@ extern "x86-interrupt" fn page_fault_handler(stack_frame: InterruptStackFrame, e
 /// タイマ割り込みハンドラ
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
     print!(".");
+
+    scheduler::yield_from_context();
 
     // End of interrupt (割り込み終了)
     unsafe {
@@ -101,4 +104,10 @@ impl InterruptIndex {
 fn test_breakpoint_exception() {
     // invoke a breakpoint exception
     x86_64::instructions::interrupts::int3();
+}
+
+#[test_case]
+fn check_interrupt_indexes() {
+    assert!(InterruptIndex::Timer.as_usize() == 32);
+    assert!(InterruptIndex::Keyboard.as_usize() == 33);
 }
