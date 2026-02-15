@@ -1,12 +1,13 @@
 pub mod context;
 mod switch;
+mod scheduler;
 
 use context::Context;
 use alloc::string::String;
 use x86_64::structures::paging::OffsetPageTable;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ProccessState {
+pub enum ProcessState {
     Unused,
     Embryo,
     Sleeping,
@@ -19,7 +20,7 @@ pub enum ProccessState {
 #[derive(Debug, Clone, Copy)]
 pub struct Process {
     pub pid: u32,               // Process ID
-    pub state: ProccessState,   // プロセスの状態
+    pub state: ProcessState,    // プロセスの状態
     pub context: Context,       // プロセスのコンテキスト
     pub kstack: u64,            // このプロセス用のカーネルスタック
 }
@@ -28,7 +29,7 @@ impl Process {
     pub fn new() -> Self {
         Process {
             pid: 0,
-            state: ProccessState::Unused,
+            state: ProcessState::Unused,
             context: Context::new(),
             kstack: 0,
         }
