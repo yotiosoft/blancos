@@ -2,7 +2,7 @@
 #![no_main]
 
 use core::panic::PanicInfo;
-use blancos::{QemuExitCode, exit_qemu, serial_println, serial_print};
+use ferrios::{QemuExitCode, exit_qemu, serial_println, serial_print};
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
@@ -11,7 +11,7 @@ fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
     should_fail();
     serial_println!("[test did not panic]");

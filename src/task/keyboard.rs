@@ -48,18 +48,18 @@ impl Stream for ScancodeStream {
         let queue = SCANCODE_QUEUE.try_get().expect("not initalized");
 
         // pop に成功したら ready を返す
-        if let Ok(scancode) = queue.pop() {
+        if let Some(scancode) = queue.pop() {
             return Poll::Ready(Some(scancode));
         }
 
         // 2回めの pop
         WAKER.register(&cx.waker());    // チェック後に push された全スキャンコードに対して wakeup が得られるよう保証する
         match queue.pop() {
-            Ok(scancode) => {
+            Some(scancode) => {
                 WAKER.take();
                 Poll::Ready(Some(scancode))
             }
-            Err(crossbeam_queue::PopError) => Poll::Pending,
+            None => Poll::Pending,
         }
     }
 }

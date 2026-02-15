@@ -1,13 +1,13 @@
 #![no_std]
 #![no_main]
 #![feature(custom_test_frameworks)]
-#![test_runner(blancos::test_runner)]
+#![test_runner(ferrios::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use blancos::println;
+use ferrios::println;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
     test_main();
 
@@ -20,7 +20,7 @@ fn test_runner(tests: &[&dyn Fn()]) {
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    blancos::test_panic_handler(info)
+    ferrios::test_panic_handler(info)
 }
 
 #[test_case]

@@ -1,14 +1,14 @@
 #![no_std]
 #![no_main]
 #![feature(custom_test_frameworks)]
-#![test_runner(blancos::test_runner)]
+#![test_runner(ferrios::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
 extern crate alloc;
 
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
-use blancos::allocator::HEAP_SIZE;
+use ferrios::allocator::HEAP_SIZE;
 use alloc::{ boxed::Box, vec::Vec };
 
 entry_point!(main);
@@ -51,15 +51,15 @@ fn many_boxes_long_lived() {
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    blancos::test_panic_handler(info)
+    ferrios::test_panic_handler(info)
 }
 
 fn main(boot_info: &'static BootInfo) -> ! {
-    use blancos::allocator;
-    use blancos::memory::{self, BootInfoFrameAllocator};
+    use ferrios::allocator;
+    use ferrios::memory::{self, BootInfoFrameAllocator};
     use x86_64::VirtAddr;
 
-    blancos::init();
+    ferrios::init();
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
     let mut mapper = unsafe {
         memory::init(phys_mem_offset)

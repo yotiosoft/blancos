@@ -2,31 +2,31 @@
 #![no_main]     // main 関数を使わない
 
 #![feature(custom_test_frameworks)] 
-#![test_runner(blancos::test_runner)]
+#![test_runner(ferrios::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
 extern crate alloc;
 
-use blancos::task::keyboard;
+use ferrios::task::keyboard;
 use bootloader::{ BootInfo, entry_point };
 use core::panic::PanicInfo;
 use alloc::{ boxed::Box, vec, vec::Vec, rc::Rc };
 
-use blancos::println;
-use blancos::memory;
-use blancos::allocator;
-use blancos::task::{ Task, executor::Executor };
+use ferrios::println;
+use ferrios::memory;
+use ferrios::allocator;
+use ferrios::task::{ Task, executor::Executor };
 
 entry_point!(kernel_main);
 
 /// エントリポイント
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    use blancos::memory::BootInfoFrameAllocator;
+    use ferrios::memory::BootInfoFrameAllocator;
     use x86_64::{ structures::paging::Page, structures::paging::Translate, VirtAddr };
 
     println!("Hello World{}", "!");
 
-    blancos::init();
+    ferrios::init();
 
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
     let mut mapper = unsafe { memory::init(phys_mem_offset) };
@@ -90,7 +90,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     executor.spawn(Task::new(keyboard::print_keypresses()));
     executor.run();
     
-    //blancos::hlt_loop();
+    //ferrios::hlt_loop();
 }
 
 // Executor 用のタスク
@@ -108,14 +108,14 @@ async fn example_task() {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    blancos::hlt_loop();
+    ferrios::hlt_loop();
 }
 
 /// テスト時に使うパニックハンドラ
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    blancos::test_panic_handler(info)
+    ferrios::test_panic_handler(info)
 }
 
 #[test_case]
